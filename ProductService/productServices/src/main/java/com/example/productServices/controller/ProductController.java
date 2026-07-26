@@ -1,0 +1,72 @@
+package com.example.productServices.controller;
+
+import com.example.productServices.dto.request.ProductRequestDto;
+import com.example.productServices.dto.response.ProductResponseDto;
+import com.example.productServices.service.ProductService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/products")
+public class ProductController {
+
+    @Autowired
+    private ProductService productService;
+
+    //adding a product
+    @PostMapping
+    public ProductResponseDto create(@Valid @RequestBody ProductRequestDto requestDto){
+        return productService.addProduct(requestDto);
+    }
+
+    //get all products
+    @GetMapping
+    public List<ProductResponseDto> getAll(){
+        List<ProductResponseDto> listOfProducts=productService.getAllProducts();
+        return listOfProducts;
+    }
+
+    //get all products by id
+    @GetMapping("/{id}")
+    public ProductResponseDto getById(@PathVariable Long id){
+        return productService.findById(id);
+    }
+
+    //update product by id
+    @PutMapping("/{id}")
+    public ProductResponseDto updatingProductById(@PathVariable Long id,@Valid @RequestBody ProductRequestDto requestDto){
+        ProductResponseDto response=productService.updateProductById(id,requestDto);
+        return response;
+    }
+
+    //delete product by id
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteById(@PathVariable Long id){
+        productService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    //get by name- by query parameter
+    @GetMapping("/search")
+    public ProductResponseDto getByName(@RequestParam String name){
+        return productService.searchByName(name);
+    }
+
+    //get all by brandId
+    @GetMapping("/brand/{brandId}")
+    public List<ProductResponseDto> getByBrandId(@PathVariable Long brandId){
+        List<ProductResponseDto> listOfProducts=productService.getByBrandId(brandId);
+        return listOfProducts;
+    }
+
+    //get all by categoryId
+    @GetMapping("/category/{categoryId}")
+    public List<ProductResponseDto> getByCategoryId(@PathVariable Long categoryId){
+        List<ProductResponseDto> listOfProducts=productService.getByCategoryId(categoryId);
+        return listOfProducts;
+    }
+}
