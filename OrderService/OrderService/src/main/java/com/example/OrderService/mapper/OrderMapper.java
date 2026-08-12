@@ -14,12 +14,13 @@ public class OrderMapper {
     //entity to dto
     public OrderItemResponseDto toOrderItemResponseDto(OrderItem item){
         return new OrderItemResponseDto(
-                item.getProductId(),
-                item.getProductName(),
-                item.getQuantity(),
-                item.getPrice(),
-                item.getPrice()* item.getQuantity()
-        );
+        item.getProductId(),
+        item.getProductName(),
+        item.getImageUrl(),
+        item.getQuantity(),
+        item.getPrice(),
+        item.getPrice() * item.getQuantity()
+);
     }
 
     public OrderResponseDto toOrderResponseDto(Order order, List<OrderItem> items){

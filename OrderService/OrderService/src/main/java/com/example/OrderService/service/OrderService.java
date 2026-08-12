@@ -1,8 +1,10 @@
 package com.example.OrderService.service;
 import com.example.OrderService.client.CartClient;
+import com.example.OrderService.client.ProductClient;
 import com.example.OrderService.dto.CartResponseDto;
 import com.example.OrderService.dto.OrderItemResponseDto;
 import com.example.OrderService.dto.OrderResponseDto;
+import com.example.OrderService.dto.ProductDto;
 import com.example.OrderService.entity.Order;
 import com.example.OrderService.entity.OrderItem;
 import com.example.OrderService.enums.OrderStatus;
@@ -14,8 +16,7 @@ import com.example.OrderService.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,6 +29,7 @@ public class OrderService {
     private final CartClient cartClient;
     private final OrderMapper orderMapper;
     private final OrderItemMapper orderItemMapper;
+    private final ProductClient productClient;
 
     //placing an order
     @Transactional
@@ -43,6 +45,24 @@ public class OrderService {
             );
         }
 
+        for (CartResponseDto item : cartItems) {
+
+            ProductDto product =
+                    productClient.getById(
+                            item.productId()
+                    );
+
+            if(item.quantity() > product.quantity()) {
+
+                throw new IllegalArgumentException(
+                        "Only "
+                        + product.quantity()
+                        + " items available for "
+                        + product.name()
+                );
+            }
+        }
+        
         Double totalAmount=cartItems.stream().mapToDouble(CartResponseDto::totalPrice).sum();
 
         Order order=Order.builder()
@@ -62,12 +82,20 @@ public class OrderService {
                 .map(orderItemRepository::save)
                 .toList();
 
+                for (CartResponseDto item : cartItems) {
+
+                    productClient.reduceStock(
+                            item.productId(),
+                            item.quantity()
+                    );
+                }
         cartClient.deleteAllItems(userId);
 
         List<OrderItemResponseDto> itemDtos=cartItems.stream()
                 .map(item->new OrderItemResponseDto(
                         item.productId(),
                         item.product().name(),
+                        item.product().imageUrl(),
                         item.quantity(),
                         item.product().price(),
                         item.totalPrice()
@@ -96,7 +124,7 @@ public class OrderService {
         List<Order> orders=orderRepository.findByUserId(userId);
 
         if(orders.isEmpty()){
-            throw new NotFoundException("No orders found for this user with userId "+userId);
+            return List.of();
         }
 
         return orders.stream().map(order ->{
@@ -113,5 +141,30 @@ public class OrderService {
         Order updatedOrder=orderRepository.save(order);
         List<OrderItem> items=orderItemRepository.findByOrderId(orderId);
         return orderMapper.toOrderResponseDto(updatedOrder,items);
+    }
+
+    public List<OrderResponseDto> getAllOrders() {
+
+        List<Order> orders = orderRepository.findAll();
+
+        if (orders.isEmpty()) {
+            return List.of();
+        }
+
+        return orders.stream()
+                .map(order -> {
+
+                    List<OrderItem> items =
+                            orderItemRepository.findByOrderId(
+                                    order.getId()
+                            );
+
+                    return orderMapper.toOrderResponseDto(
+                            order,
+                            items
+                    );
+
+                })
+                .toList();
     }
 }

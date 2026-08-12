@@ -20,5 +20,6 @@ public class Brand {
 
     private String country;
     private String description;
-    private Boolean active;
+    @Column(nullable = false)
+    private Boolean active = true;
 }

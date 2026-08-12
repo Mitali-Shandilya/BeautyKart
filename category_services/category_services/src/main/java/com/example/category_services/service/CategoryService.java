@@ -21,13 +21,16 @@ public class CategoryService {
     //adding a category
     public CategoryResponseDto addCategory(CategoryRequestDto requestDto){
         Category newCategory=categoryMapper.toEntity(requestDto);
+        if(newCategory.getActive() == null){
+            newCategory.setActive(true);
+        }
         Category savedCategory=categoryRespository.save(newCategory);
         return categoryMapper.toDto(savedCategory);
     }
 
     //getting all categories
     public List<CategoryResponseDto> getAllCategories(){
-        return categoryRespository.findAll().stream().map(categoryMapper::toDto).toList();
+        return categoryRespository.findByActiveTrue().stream().map(categoryMapper::toDto).toList();
     }
 
     //getting by id
@@ -49,7 +52,8 @@ public class CategoryService {
     //delete by id
     public void deleteById(Long id){
         Category existingCategory=categoryRespository.findById(id).orElseThrow(()-> new NotFoundException("category with id "+id+" not found!"));
-        categoryRespository.delete(existingCategory);
+        existingCategory.setActive(false);
+        categoryRespository.save(existingCategory);
     }
 
     //get by name
@@ -57,4 +61,27 @@ public class CategoryService {
         Category existingCategory=categoryRespository.findByNameIgnoreCase(name).orElseThrow(()->new NotFoundException("category "+name+" not found!"));
         return categoryMapper.toDto(existingCategory);
     }
+
+    //get all categories for admin
+    public List<CategoryResponseDto> getAllCategoryForAdmin() {
+
+        return categoryRespository.findAll()
+                .stream()
+                .map(categoryMapper::toDto)
+                .toList();
+    }
+
+    //change status to active   
+    public void activateCategory(Long id){
+
+    Category category =categoryRespository.findById(id)
+            .orElseThrow(() ->
+                    new NotFoundException(
+                            "Category with id " + id + " not found!"
+                    ));
+
+    category.setActive(true);
+
+    categoryRespository.save(category);
+}
 }

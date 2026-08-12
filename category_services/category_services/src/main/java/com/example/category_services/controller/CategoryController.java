@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/categories")
 public class CategoryController {
@@ -55,5 +56,20 @@ public class CategoryController {
     @GetMapping("/by-name/{name}")
     public CategoryResponseDto getByName(@PathVariable String name){
         return categoryService.findByName(name);
+    }
+
+    //get all for admin
+    @GetMapping("/admin")
+    public List<CategoryResponseDto> getAllCategoryForAdmin(){
+        return categoryService.getAllCategoryForAdmin();
+    }
+
+    @PutMapping("/admin/{id}/activate")
+    public ResponseEntity<Void> activateCategory(
+            @PathVariable Long id) {
+
+        categoryService.activateCategory(id);
+
+        return ResponseEntity.ok().build();
     }
 }

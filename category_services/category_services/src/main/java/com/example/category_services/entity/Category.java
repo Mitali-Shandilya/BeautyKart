@@ -21,5 +21,6 @@ public class Category {
     private String name;
 
     private String description;
-    private Boolean active;
+    @Column(nullable = false)
+    private Boolean active = true;
 }

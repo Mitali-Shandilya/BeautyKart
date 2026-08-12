@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/brands")
 public class BrandController {
@@ -53,5 +54,18 @@ public class BrandController {
     @GetMapping("/by-name/{name}")
     public BrandResponseDto getByName(@PathVariable String name){
         return brandService.getByName(name);
+    }
+
+    //get All for admin
+    @GetMapping("/admin")
+    public  List<BrandResponseDto> getAllBrandsForAdmin(){
+        return brandService.getAllBrandsForAdmin();
+    }
+
+    //change status to active by admin
+    @PutMapping("/admin/{id}/activate")
+    public ResponseEntity<Void> activateBrand(@PathVariable Long id){
+        brandService.activateBrand(id);
+        return ResponseEntity.ok().build();
     }
 }

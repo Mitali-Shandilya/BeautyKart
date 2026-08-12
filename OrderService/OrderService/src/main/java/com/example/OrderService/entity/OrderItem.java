@@ -26,8 +26,10 @@ public class OrderItem {
     private String productName;
 
     @Column(nullable = false)
-    private Integer quantity;
+    private String imageUrl;
 
+    @Column(nullable = false)
+    private Integer quantity;
 
     @Column(nullable = false)
     private Double price;

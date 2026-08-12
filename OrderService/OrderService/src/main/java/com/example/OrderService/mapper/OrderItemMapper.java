@@ -11,6 +11,7 @@ public class OrderItemMapper {
         item.setOrderId(orderId);
         item.setProductId(cartItem.productId());
         item.setProductName(cartItem.product().name());
+        item.setImageUrl(cartItem.product().imageUrl());
         item.setQuantity(cartItem.quantity());
         item.setPrice(cartItem.product().price());
         return item;

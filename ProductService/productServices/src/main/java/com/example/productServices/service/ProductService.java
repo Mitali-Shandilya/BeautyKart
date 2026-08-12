@@ -51,12 +51,28 @@ public class ProductService {
 
     // get all products
     public List<ProductResponseDto> getAllProducts() {
-
-        return productRepository.findAll()
+        return productRepository.findByActiveTrue()
                 .stream()
-                .map(productMapper::toDto)
+                .map(product -> {
+
+                        CategoryResponseDto category =
+                                categoryClient.getById(
+                                        product.getCategoryId()
+                                );
+
+                        BrandResponseDto brand =
+                                brandClient.getById(
+                                        product.getBrandId()
+                                );
+
+                        return productMapper.toDto(
+                                product,
+                                category,
+                                brand
+                        );
+                })
                 .toList();
-    }
+        }
 
     // get by id
     public ProductResponseDto findById(Long id) {
@@ -129,8 +145,9 @@ public class ProductService {
                         new NotFoundException(
                                 "Product with id " + id + " not found!"
                         ));
+        existing.setActive(false);
 
-        productRepository.delete(existing);
+        productRepository.save(existing);
     }
 
     // search by name
@@ -142,14 +159,28 @@ public class ProductService {
                                 "Product " + name + " not found!"
                         ));
 
-        return productMapper.toDto(existing);
-    }
+                CategoryResponseDto category =
+                        categoryClient.getById(
+                                existing.getCategoryId()
+                        );
+
+                BrandResponseDto brand =
+                        brandClient.getById(
+                                existing.getBrandId()
+                        );
+
+                return productMapper.toDto(
+                        existing,
+                        category,
+                        brand
+                );
+        }
 
     // get by brand id
     public List<ProductResponseDto> getByBrandId(Long brandId) {
 
         List<Product> products =
-                productRepository.findByBrandId(brandId);
+                productRepository.findByBrandIdAndActiveTrue(brandId);
 
         if (products.isEmpty()) {
             throw new NotFoundException(
@@ -158,15 +189,32 @@ public class ProductService {
         }
 
         return products.stream()
-                .map(productMapper::toDto)
-                .toList();
+        .map(product -> {
+
+            CategoryResponseDto category =
+                    categoryClient.getById(
+                            product.getCategoryId()
+                    );
+
+            BrandResponseDto brand =
+                    brandClient.getById(
+                            product.getBrandId()
+                    );
+
+            return productMapper.toDto(
+                    product,
+                    category,
+                    brand
+            );
+        })
+        .toList();
     }
 
     // get by category id
     public List<ProductResponseDto> getByCategoryId(Long categoryId) {
 
         List<Product> products =
-                productRepository.findByCategoryId(categoryId);
+                productRepository.findByCategoryIdAndActiveTrue(categoryId);
 
         if (products.isEmpty()) {
             throw new NotFoundException(
@@ -175,8 +223,25 @@ public class ProductService {
         }
 
         return products.stream()
-                .map(productMapper::toDto)
-                .toList();
+        .map(product -> {
+
+            CategoryResponseDto category =
+                    categoryClient.getById(
+                            product.getCategoryId()
+                    );
+
+            BrandResponseDto brand =
+                    brandClient.getById(
+                            product.getBrandId()
+                    );
+
+            return productMapper.toDto(
+                    product,
+                    category,
+                    brand
+            );
+        })
+        .toList();
     }
 
     // helper method to validate category and brand exists
@@ -202,4 +267,65 @@ public class ProductService {
             );
         }
     }
+
+    //get all for admin
+    public List<ProductResponseDto> getAllProductsForAdmin() {
+        return productRepository.findAll()
+                .stream()
+                .map(product -> {
+
+                        CategoryResponseDto category =
+                                categoryClient.getById(
+                                        product.getCategoryId()
+                                );
+
+                        BrandResponseDto brand =
+                                brandClient.getById(
+                                        product.getBrandId()
+                                );
+
+                        return productMapper.toDto(
+                                product,
+                                category,
+                                brand
+                        );
+                })
+                .toList();
+        }
+
+        //change status to active by admin
+        public void activateProduct(Long id){
+
+                Product product = productRepository.findById(id)
+                        .orElseThrow(() ->
+                                new NotFoundException(
+                                        "Product with id " + id + " not found!"
+                                ));
+
+                product.setActive(true);
+
+                productRepository.save(product);
+        }
+
+        //reduce stock
+        public void reduceStock(Long productId, Integer quantity) {
+                Product product = productRepository.findById(productId)
+                        .orElseThrow(() ->
+                                new NotFoundException(
+                                        "Product not found with id " + productId
+                                ));
+
+                if (product.getQuantity() < quantity) {
+
+                        throw new IllegalArgumentException(
+                                "Insufficient stock available"
+                        );
+                }
+
+                product.setQuantity(
+                        product.getQuantity() - quantity
+                );
+
+                productRepository.save(product);
+        }
 }

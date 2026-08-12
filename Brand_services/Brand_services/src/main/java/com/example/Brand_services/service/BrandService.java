@@ -7,7 +7,7 @@ import com.example.Brand_services.exception.NotFoundException;
 import com.example.Brand_services.mapper.BrandMapper;
 import com.example.Brand_services.repository.BrandRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,7 +29,7 @@ public class BrandService {
 
     //get all brands
     public List<BrandResponseDto> getAllBrands(){
-        return brandRepository.findAll().stream().map(brandMapper::toDto).toList();
+        return brandRepository.findByActiveTrue().stream().map(brandMapper::toDto).toList();
     }
 
     //get by id
@@ -52,12 +52,36 @@ public class BrandService {
     //delete by id
     public void deleteById(Long id){
         Brand existingBrand=brandRepository.findById(id).orElseThrow(()->new NotFoundException("brand with id "+id+" not found!"));
-        brandRepository.delete(existingBrand);
+        existingBrand.setActive(false);
+        brandRepository.save(existingBrand);
     }
 
     //get by name
     public BrandResponseDto getByName(String name){
         Brand existingBrand=brandRepository.findByNameIgnoreCase(name).orElseThrow(()->new NotFoundException("brand "+name+" not found!"));
         return brandMapper.toDto(existingBrand);
+    }
+
+    //get All brands for admin
+    public List<BrandResponseDto> getAllBrandsForAdmin() {
+
+        return brandRepository.findAll()
+                .stream()
+                .map(brandMapper::toDto)
+                .toList();
+    }
+
+    //change status to active by admin
+    public void activateBrand(Long id){
+
+        Brand brand = brandRepository.findById(id)
+                .orElseThrow(() ->
+                        new NotFoundException(
+                                "Brand with id " + id + " not found!"
+                        ));
+
+        brand.setActive(true);
+
+        brandRepository.save(brand);
     }
 }
