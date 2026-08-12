@@ -4,40 +4,39 @@ export default function AdminDashboard() {
     return (
         <>
             <AdminNavbar />
+            <div className="admin-hero">
 
-            <div className="dashboard-container">
+                <h1>🌸 BeautyKart Admin Panel</h1>
 
-                <h2>Admin Dashboard</h2>
-
-                <p className="dashboard-subtitle">
-                    Manage Products, Brands and Categories
+                <p>
+                    Manage products, inventory and orders
                 </p>
 
-                <div className="dashboard-grid">
+            </div>
 
-                    <div className="dashboard-card">
-                        <h3>Products</h3>
-                        <p>Add, Update, Delete and Activate Products</p>
-                    </div>
+            <div className="stats-grid">
 
-                    <div className="dashboard-card">
-                        <h3>Brands</h3>
-                        <p>Manage Active and Inactive Brands</p>
-                    </div>
-
-                    <div className="dashboard-card">
-                        <h3>Categories</h3>
-                        <p>Manage Active and Inactive Categories</p>
-                    </div>
-
-                    <div className="dashboard-card">
-                        <h3>Orders</h3>
-                        <p>Manage Orders</p>
-                    </div>
-
+                <div className="stat-card">
+                    <h3>Products</h3>
+                    <span>120</span>
                 </div>
 
-            </div>
+                <div className="stat-card">
+                    <h3>Orders</h3>
+                    <span>45</span>
+                </div>
+
+                <div className="stat-card">
+                    <h3>Brands</h3>
+                    <span>12</span>
+                </div>
+
+                <div className="stat-card">
+                    <h3>Categories</h3>
+                    <span>8</span>
+                </div>
+
+            </div> े
         </>
     );
 }

@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 function Login() {
 
     const navigate = useNavigate();
+    const [errorMessage, setErrorMessage] = useState("");
 
     const [form, setForm] = useState({
         email: "",
@@ -17,6 +18,7 @@ function Login() {
         try {
 
             const response = await login(form);
+            setErrorMessage("");
 
             sessionStorage.setItem(
                 "userId",
@@ -38,58 +40,80 @@ function Login() {
                 response.data.token
             );
 
-            
+
             if (response.data.role === "ADMIN") {
-                    navigate("/admin");
+                navigate("/admin");
             } else {
-                    navigate("/");
+                navigate("/");
             }
         }
         catch (error) {
-            alert("Invalid Credentials");
+            setErrorMessage(error.response?.data?.message || "Invalid Credentials");
         }
     };
 
     return (
-        <div>
-            <h2>Login</h2>
+        <div className="auth-container">
 
-            <form onSubmit={handleSubmit}>
+            <div className="auth-card">
 
-                <input
-                    type="email"
-                    placeholder="Email"
-                    onChange={(e) =>
-                        setForm({
-                            ...form,
-                            email: e.target.value
-                        })
-                    }
-                />
+                <h2>Welcome Back 🌸</h2>
 
-                <input
-                    type="password"
-                    placeholder="Password"
-                    onChange={(e) =>
-                        setForm({
-                            ...form,
-                            password: e.target.value
-                        })
-                    }
-                />
-
-                <button type="submit">
-                    Login
-                </button>
-
-                <p>
-                    Don't have an account?{" "}
-                    <Link to="/register">
-                        Register
-                    </Link>
+                <p className="auth-subtitle">
+                    Login to continue your BeautyKart journey
                 </p>
 
-            </form>
+                <form onSubmit={handleSubmit}>
+
+                    <input
+                        type="email"
+                        placeholder="Enter your email"
+                        onChange={(e) =>
+                            setForm({
+                                ...form,
+                                email: e.target.value
+                            })
+                        }
+                    />
+
+                    <input
+                        type="password"
+                        placeholder="Enter your password"
+                        onChange={(e) =>
+                            setForm({
+                                ...form,
+                                password: e.target.value
+                            })
+                        }
+                    />
+
+                    <button
+                        type="submit"
+                        className="auth-btn"
+                    >
+                        Login
+                    </button>
+
+                    {
+                        errorMessage && (
+                            <p className="error-message">
+                                {errorMessage}
+                            </p>
+                        )
+                    }
+
+                    <p className="auth-link">
+                        Don't have an account?
+
+                        <Link to="/register">
+                            Register
+                        </Link>
+                    </p>
+
+                </form>
+
+            </div>
+
         </div>
     );
 }

@@ -77,4 +77,4 @@ GET    /api/categories/{id}
 PUT    /api/categories/{id}
 DELETE /api/categories/{id}
 GET    /api/categories/by-name/{name}
-PUT    /api/categories/admin/{id}/activate
+PUT    /api/categories/admin/{id}/activate Our stage, are font करना है, कोई ऑडिट ऑल है, मैंने सोचा अरे पूरा पैर हुआ है कि हसर होती है, वो भेजसकते

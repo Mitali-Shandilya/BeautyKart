@@ -5,6 +5,7 @@ function Navbar() {
     const navigate = useNavigate();
     const token = sessionStorage.getItem("token");
     const role = sessionStorage.getItem("role");
+    const email = sessionStorage.getItem("email");
 
     const handleLogout = () => {
 
@@ -20,6 +21,7 @@ function Navbar() {
             <Link to="/">Home</Link>
 
             <Link to="/products">Products</Link>
+
             {!token ? (
                 <Link to="/login">
                     Account
@@ -27,21 +29,22 @@ function Navbar() {
             ) : (
                 <>
                     <Link to="/cart">Cart</Link>
-                    <Link to="/orders">Orders</Link>
-                    <Link to="/profile">My Profile</Link>
 
-                    {role === "ADMIN" && (
-                        <Link to="/admin">
-                            Admin Panel
-                        </Link>
-                    )}
+                    <Link to="/orders">
+                        Orders
+                    </Link>
 
-                    <button
-                        className="logout-btn"
-                        onClick={handleLogout}
-                    >
-                        Logout
-                    </button>
+                    <Link to="/profile" className="profile-nav">
+
+                        <span className="profile-circle">
+                            {email?.charAt(0).toUpperCase()}
+                        </span>
+
+                        My Profile
+
+                    </Link>
+
+                    
                 </>
             )}
 

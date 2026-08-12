@@ -5,6 +5,7 @@ import { register } from "../services/authService";
 function Register() {
 
     const navigate = useNavigate();
+    const [errorMessage, setErrorMessage] = useState("");
 
     const [form, setForm] = useState({
         firstName: "",
@@ -56,7 +57,15 @@ function Register() {
 
             <div className="auth-card">
 
-                <h2>Create Account</h2>
+                <div className="auth-logo">
+                    🌸
+                </div>
+
+                <h2>Create Your Account</h2>
+
+                <p className="auth-subtitle">
+                    Join BeautyKart and explore premium beauty products
+                </p>
 
                 <form onSubmit={handleSubmit}>
 
@@ -79,7 +88,7 @@ function Register() {
                     <input
                         type="email"
                         name="email"
-                        placeholder="Email"
+                        placeholder="Email Address"
                         value={form.email}
                         onChange={handleChange}
                     />
@@ -102,19 +111,21 @@ function Register() {
 
                     <button
                         type="submit"
-                        className="add-btn"
+                        className="auth-btn"
                     >
-                        Register
+                        Create Account
                     </button>
 
-                    <p>
-                        Already have an account?{" "}
-                        <Link to="/login">
-                            Login
-                        </Link>
+                    <p className="auth-link">
+                        Already have an account?
+                        <Link to="/login"> Login</Link>
                     </p>
 
                 </form>
+
+                <p className="beauty-tagline">
+                    ✨ Discover Beauty, Confidence & Elegance ✨
+                </p>
 
             </div>
 
