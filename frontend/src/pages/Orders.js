@@ -4,51 +4,45 @@ import Navbar from "../components/Navbar";
 
 function Orders() {
     const [orders, setOrders] = useState([]);
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         loadOrders();
     }, []);
 
-    // const loadOrders = async () => {
-    //     try {
-    //         const userId = sessionStorage.getItem("userId");
-    //         const response = await getOrderByUserId(userId);
-    //         setOrders(response.data);
-    //     }
-    //     catch (error) {
-    //         console.error(error);
-    //         if (error.response) {
-    //             console.log(error.response.data);
-    //             console.log(error.response.status);
-    //         }
-    //     }
-    // };
     const loadOrders = async () => {
-    try {
+        try {
 
-        const userId = sessionStorage.getItem("userId");
+            const userId = sessionStorage.getItem("userId");
 
-        console.log("USER ID =", userId);
+            console.log("USER ID =", userId);
 
-        const response = await getOrderByUserId(userId);
+            const response = await getOrderByUserId(userId);
 
-        console.log("RESPONSE =", response.data);
+            console.log("RESPONSE =", response.data);
+            setErrorMessage("");
+            setOrders(response.data);
 
-        setOrders(response.data);
+        } catch (error) {
 
-    } catch (error) {
+            setOrders([]);
 
-        console.log("FULL ERROR =", error);
-
-        if (error.response) {
-            console.log("STATUS =", error.response.status);
-            console.log("DATA =", error.response.data);
+            setErrorMessage(
+                error.response?.data?.message ||
+                "Unable to load orders."
+            );
         }
-    }
-};
+    };
     return (
         <>
             <Navbar />
+            {
+                errorMessage && (
+                    <div className="error-message">
+                        ⚠️ {errorMessage}
+                    </div>
+                )
+            }
             <div className="orders-header">
                 <h2>My Orders</h2>
             </div>
@@ -58,7 +52,10 @@ function Orders() {
 
                 {
                     orders.length === 0 ? (
-                        <p>No orders found.</p>
+                        <div className="empty-orders">
+                            📦 No orders found.
+                            <p>Your order history will appear here.</p>
+                        </div>
                     ) : (
                         orders.map(order => (
                             <div
@@ -73,7 +70,7 @@ function Orders() {
                                             : "status-active"
                                     }
                                 >
-                                    {order.status}
+                                    {order.orderStatus}
                                 </p>
                                 <p className="order-total">
                                     ₹ {order.totalAmount}
@@ -89,7 +86,7 @@ function Orders() {
                                     >
 
                                         {item.imageUrl && (
-                                            <img src={item.imageUrl} className="order-item-image"/>
+                                            <img src={item.imageUrl} alt={item.productName} className="order-item-image" />
                                         )}
 
                                         <p>{item.productName}</p>

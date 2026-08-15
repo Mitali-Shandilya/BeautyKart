@@ -13,12 +13,19 @@ function Products() {
     const [categoryId, setCategoryId] = useState("");
     const [brands, setBrands] = useState([]);
     const [categories, setCategories] = useState([]);
-
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
     const loadProducts = async () => {
+
         const response = await getAllProducts();
+
+        setErrorMessage("");
+        setSuccessMessage("");
+
         setProducts(response.data);
     };
+
     const loadBrands = async () => {
         const response = await getAllBrands();
         setBrands(response.data);
@@ -43,13 +50,23 @@ function Products() {
             return;
         }
         try {
+
             const response = await searchProduct(keyword);
 
+            setErrorMessage("");
+            setSuccessMessage("");
+
             setProducts([response.data]);
+
         }
         catch (error) {
-            console.error(error);
-            alert("Product not found");
+
+            setProducts([]);
+
+            setErrorMessage(
+                error.response?.data?.message ||
+                `No product found for "${keyword}".`
+            );
         }
     };
 
@@ -58,8 +75,13 @@ function Products() {
         const token = sessionStorage.getItem("token");
 
         if (!token) {
-            alert("Please login to add products to cart");
-            navigate("/login");
+
+            navigate("/login", {
+                state: {
+                    message:
+                        "Please login to add products to cart."
+                }
+            });
             return;
         }
 
@@ -75,12 +97,22 @@ function Products() {
 
             await addToCart(cartItem);
 
-            alert("Product added to cart successfully!");
+            setSuccessMessage(
+                "Product added to cart successfully!"
+            );
+            setTimeout(() => {
+                setSuccessMessage("");
+            }, 3000);
+
+            setErrorMessage("");
 
         } catch (error) {
 
             console.error(error);
-            alert("Failed to add product to cart");
+            setErrorMessage(
+                error.response?.data?.message ||
+                "Failed to add product to cart."
+            );
         }
     };
 
@@ -92,13 +124,22 @@ function Products() {
         }
 
         try {
+
             const response =
                 await getProductsByBrand(brandId);
 
+            setErrorMessage("");
             setProducts(response.data);
+
         }
         catch (error) {
-            console.error(error);
+
+            setProducts([]);
+
+            setErrorMessage(
+                error.response?.data?.message ||
+                "No products found."
+            );
         }
     };
 
@@ -110,13 +151,22 @@ function Products() {
         }
 
         try {
+
             const response =
                 await getProductsByCategory(categoryId);
 
+            setErrorMessage("");
             setProducts(response.data);
+
         }
         catch (error) {
-            console.error(error);
+
+            setProducts([]);
+
+            setErrorMessage(
+                error.response?.data?.message ||
+                "No products found."
+            );
         }
     };
 
@@ -124,11 +174,27 @@ function Products() {
     return (
         <>
             <Navbar />
+            {
+                errorMessage && (
+                    <div className="error-message">
+                        ⚠️ {errorMessage}
+                    </div>
+                )
+            }
+
+            {
+                successMessage && (
+                    <div className="success-message">
+                        ✅ {successMessage}
+                    </div>
+                )
+            }
             <div className="product-filters">
                 <div className="search-section">
 
                     <input
                         type="text"
+                        value={keyword}
                         placeholder="Search Product"
                         onChange={(e) => setKeyword(e.target.value)}
                     />
@@ -208,8 +274,20 @@ function Products() {
                 </button>
             </div>
             <hr />
+
             <div className="user-products-container">
+
                 <h2>Products</h2>
+                {
+                    products.length === 0 &&
+                    !errorMessage && (
+
+                        <div className="empty-products">
+                            No products available.
+                        </div>
+
+                    )
+                }
                 {products.map((product) => {
                     return (
                         <div

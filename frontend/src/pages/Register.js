@@ -5,6 +5,7 @@ import { register } from "../services/authService";
 function Register() {
 
     const navigate = useNavigate();
+    const [errors, setErrors] = useState({});
     const [errorMessage, setErrorMessage] = useState("");
 
     const [form, setForm] = useState({
@@ -23,9 +24,13 @@ function Register() {
     };
 
     const handleSubmit = async (e) => {
+
         e.preventDefault();
 
         try {
+
+            setErrors({});
+            setErrorMessage("");
 
             await register(form);
 
@@ -35,19 +40,38 @@ function Register() {
 
         } catch (error) {
 
-            console.error(error);
+            console.log("FULL ERROR =", error);
 
             if (error.response) {
 
-                console.log("STATUS:", error.response.status);
+                console.log(
+                    "RESPONSE DATA =",
+                    error.response.data
+                );
 
-                console.log("DATA:", error.response.data);
+                const data = error.response.data;
 
-                alert(JSON.stringify(error.response.data));
+                if (data.errors) {
+
+                    console.log(
+                        "VALIDATION ERRORS =",
+                        data.errors
+                    );
+
+                    setErrors(data.errors);
+
+                } else {
+
+                    setErrorMessage(
+                        data.message
+                    );
+                }
 
             } else {
 
-                alert(error.message);
+                setErrorMessage(
+                    "Something went wrong"
+                );
             }
         }
     };
@@ -68,6 +92,17 @@ function Register() {
                 </p>
 
                 <form onSubmit={handleSubmit}>
+                    {
+                        errorMessage && (
+
+                            <div className="error-message">
+
+                                {errorMessage}
+
+                            </div>
+
+                        )
+                    }
 
                     <input
                         type="text"
@@ -77,6 +112,14 @@ function Register() {
                         onChange={handleChange}
                     />
 
+                    {
+                        errors.firstName &&
+                        <span className="field-error">
+                            {errors.firstName}
+                        </span>
+                    }
+
+
                     <input
                         type="text"
                         name="lastName"
@@ -84,6 +127,14 @@ function Register() {
                         value={form.lastName}
                         onChange={handleChange}
                     />
+
+                    {
+                        errors.lastName &&
+                        <span className="field-error">
+                            {errors.lastName}
+                        </span>
+                    }
+
 
                     <input
                         type="email"
@@ -93,6 +144,10 @@ function Register() {
                         onChange={handleChange}
                     />
 
+                    {
+                        errors.email && <span className="field-error">{errors.email}</span>
+                    }
+
                     <input
                         type="text"
                         name="phoneNumber"
@@ -101,6 +156,14 @@ function Register() {
                         onChange={handleChange}
                     />
 
+                    {
+                        errors.phoneNumber &&
+                        <span className="field-error">
+                            {errors.phoneNumber}
+                        </span>
+                    }
+
+
                     <input
                         type="password"
                         name="password"
@@ -108,6 +171,13 @@ function Register() {
                         value={form.password}
                         onChange={handleChange}
                     />
+
+                    {
+                        errors.password &&
+                        <span className="field-error">
+                            {errors.password}
+                        </span>
+                    }
 
                     <button
                         type="submit"

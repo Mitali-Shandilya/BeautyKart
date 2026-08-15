@@ -7,15 +7,31 @@ function ManageBrands() {
     const [brandName, setBrandName] = useState("");
     const [editingId, setEditingId] = useState(null);
     const [country, setCountry] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
     useEffect(() => {
         loadBrands();
     }, []);
 
     const loadBrands = async () => {
-        const response = await getAllBrandsForAdmin();
-        setBrands(response.data);
+        try {
+
+            const response = await getAllBrandsForAdmin();
+
+            setErrorMessage("");
+
+            setBrands(response.data);
+
+        } catch (error) {
+
+            setErrorMessage(
+                error.response?.data?.message ||
+                "Unable to load brands."
+            );
+        }
     };
+
 
     const handleSubmit = async () => {
 
@@ -29,24 +45,46 @@ function ManageBrands() {
         try {
 
             if (editingId) {
+
                 await updateBrand(editingId, brand);
+                await loadBrands();
+                setErrorMessage("");
+                setSuccessMessage(
+                    "Brand updated successfully."
+                );
+
+                setTimeout(() => {
+                    setSuccessMessage("");
+                }, 3000);
                 setEditingId(null);
-            }
-            else {
+                setBrandName("");
+                setCountry("");
+
+            } else {
+
                 await addBrand(brand);
+                console.log("ADD SUCCESS");
+                await loadBrands();
+                setErrorMessage("");
+                setSuccessMessage(
+                    "Brand added successfully."
+                );
+
+                setTimeout(() => {
+                    setSuccessMessage("");
+                }, 3000);
+                setBrandName("");
+                setCountry("");
             }
+        }
+        catch (error) {
 
-            setBrandName("");
-            setCountry("");
 
-            loadBrands();
 
-        } catch (error) {
-            console.error(error);
-
-            if (error.response) {
-                console.log(error.response.data);
-            }
+            setErrorMessage(
+                error.response?.data?.message ||
+                "Unable to save brand."
+            );
         }
     };
 
@@ -67,20 +105,69 @@ function ManageBrands() {
 
         try {
             await deleteBrand(id);
-            loadBrands();
+
+            setErrorMessage("");
+            await loadBrands();
+            setSuccessMessage(
+                "Brand deleted successfully."
+            );
+
+            setTimeout(() => {
+                setSuccessMessage("");
+            }, 3000);
         }
         catch (error) {
-            console.error(error);
+            setErrorMessage(
+                error.response?.data?.message ||
+                "Unable to delete brand."
+            );
         }
     };
 
     const handleActivate = async (id) => {
-        await activateBrand(id);
-        loadBrands();
+
+        try {
+
+            await activateBrand(id);
+
+            setErrorMessage("");
+            await loadBrands();
+
+            setSuccessMessage(
+                "Brand activated successfully."
+            );
+
+
+
+            setTimeout(() => {
+                setSuccessMessage("");
+            }, 3000);
+
+        } catch (error) {
+            setErrorMessage(
+                error.response?.data?.message ||
+                "Unable to activate brand."
+            );
+        }
     };
     return (
         <>
             <AdminNavbar />
+            {
+                errorMessage && (
+                    <div className="error-message">
+                        ⚠️ {errorMessage}
+                    </div>
+                )
+            }
+
+            {
+                successMessage && (
+                    <div className="success-message">
+                        ✅ {successMessage}
+                    </div>
+                )
+            }
             <div className="brands-container">
                 <div className="brand-form">
                     <h2>Manage Brands</h2>
@@ -109,7 +196,9 @@ function ManageBrands() {
                 <div className="brand-list">
 
                     {brands.length === 0 ? (
-                        <p>No brands found.</p>
+                        <div className="empty-brands">
+                            🏷️ No brands found.
+                        </div>
                     ) : (
 
                         brands.map(brand => (

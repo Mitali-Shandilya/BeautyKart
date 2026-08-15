@@ -1,11 +1,17 @@
 import { useState } from "react";
 import { login } from "../services/authService";
 import { Link, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 function Login() {
 
     const navigate = useNavigate();
-    const [errorMessage, setErrorMessage] = useState("");
+    const [errors, setErrors] = useState({});
+    const location = useLocation();
+
+    const [errorMessage, setErrorMessage] = useState(
+        location.state?.message || ""
+    );
 
     const [form, setForm] = useState({
         email: "",
@@ -16,6 +22,9 @@ function Login() {
         e.preventDefault();
 
         try {
+            setErrors({});
+            setErrorMessage("");
+
 
             const response = await login(form);
             setErrorMessage("");
@@ -48,7 +57,30 @@ function Login() {
             }
         }
         catch (error) {
-            setErrorMessage(error.response?.data?.message || "Invalid Credentials");
+
+            console.log("FULL ERROR =", error);
+
+            if (error.response) {
+
+                const data = error.response.data;
+
+                if (data.errors) {
+
+                    setErrors(data.errors);
+
+                } else {
+
+                    setErrorMessage(
+                        "Incorrect email or password."
+                    );
+                }
+
+            } else {
+
+                setErrorMessage(
+                    "Unable to login. Please try again."
+                );
+            }
         }
     };
 
@@ -64,6 +96,17 @@ function Login() {
                 </p>
 
                 <form onSubmit={handleSubmit}>
+                    {
+                        errorMessage && (
+
+                            <div className="error-message">
+
+                                {errorMessage}
+
+                            </div>
+
+                        )
+                    }
 
                     <input
                         type="email"
@@ -75,6 +118,12 @@ function Login() {
                             })
                         }
                     />
+                    {
+                        errors.email &&
+                        <span className="field-error">
+                            {errors.email}
+                        </span>
+                    }
 
                     <input
                         type="password"
@@ -86,6 +135,12 @@ function Login() {
                             })
                         }
                     />
+                    {
+                        errors.password &&
+                        <span className="field-error">
+                            {errors.password}
+                        </span>
+                    }
 
                     <button
                         type="submit"
@@ -93,14 +148,6 @@ function Login() {
                     >
                         Login
                     </button>
-
-                    {
-                        errorMessage && (
-                            <p className="error-message">
-                                {errorMessage}
-                            </p>
-                        )
-                    }
 
                     <p className="auth-link">
                         Don't have an account?

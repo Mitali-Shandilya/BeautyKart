@@ -13,6 +13,9 @@ function ManageCategories() {
     const [categories, setCategories] = useState([]);
     const [categoryName, setCategoryName] = useState("");
     const [editingId, setEditingId] = useState(null);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState(null);
 
     useEffect(() => {
         loadCategories();
@@ -21,50 +24,79 @@ function ManageCategories() {
     const loadCategories = async () => {
         try {
             const response = await getAllCategoriesForAdmin();
+            setErrorMessage("");
             setCategories(response.data);
         }
         catch (error) {
-            console.error(error);
+            setErrorMessage(
+                error.response?.data?.message ||
+                "Unable to load categories."
+            );
         }
     };
 
     const handleSubmit = async () => {
 
-        const category = {
+        const category = editingId ? {
+            ...selectedCategory,
+            name: categoryName
+        } : {
             name: categoryName
         };
 
         try {
 
             if (editingId) {
+
                 await updateCategory(
                     editingId,
                     category
                 );
 
+                await loadCategories();
+
+                setErrorMessage("");
+
+                setSuccessMessage(
+                    "Category updated successfully."
+                );
+
                 setEditingId(null);
-            }
-            else {
+
+            } else {
+
                 await addCategory(category);
+
+                await loadCategories();
+
+                setErrorMessage("");
+
+                setSuccessMessage(
+                    "Category added successfully."
+                );
             }
+
+            setTimeout(() => {
+                setSuccessMessage("");
+            }, 3000);
 
             setCategoryName("");
-
-            loadCategories();
-
         }
         catch (error) {
-            console.error(error);
+            setErrorMessage(
+                error.response?.data?.message ||
+                "Unable to save category."
+            );
         }
     };
 
     const handleEdit = (category) => {
 
+        setSelectedCategory(category);
+
         setEditingId(category.id);
 
-        setCategoryName(
-            category.name
-        );
+        setCategoryName(category.name);
     };
 
     const handleDelete = async (id) => {
@@ -79,21 +111,58 @@ function ManageCategories() {
 
         try {
             await deleteCategory(id);
-            loadCategories();
+            setErrorMessage("");
+            await loadCategories();
+            setSuccessMessage("Category deleted successfully!");
+            setTimeout(() => {
+                setSuccessMessage("");
+            }, 3000);
+
         }
         catch (error) {
-            console.error(error);
+            setErrorMessage(
+                error.response?.data?.message ||
+                "Unable to delete category."
+            );
+
         }
     };
 
     const handleActivate = async (id) => {
-        await activateCategory(id);
-        loadCategories();
+        try {
+            await activateCategory(id);
+            setErrorMessage("");
+            await loadCategories();
+            setSuccessMessage(
+                "Category activated successfully."
+            );
+            setTimeout(() => {
+                setSuccessMessage("");
+            }, 3000);
+        } catch (error) {
+            setErrorMessage(
+                error.response?.data?.message ||
+                "Unable to activate category."
+            );
+        }
     };
     return (
         <>
             <AdminNavbar />
-
+            {
+                errorMessage && (
+                    <div className="error-message">
+                        ⚠️ {errorMessage}
+                    </div>
+                )
+            }
+            {
+                successMessage && (
+                    <div className="success-message">
+                        ✅ {successMessage}
+                    </div>
+                )
+            }
             <div className="categories-container">
 
                 <div className="category-form">
@@ -127,7 +196,9 @@ function ManageCategories() {
                 <div className="category-list">
 
                     {categories.length === 0 ? (
-                        <p>No categories found.</p>
+                        <div className="empty-categories">
+                            📂 No categories found.
+                        </div>
                     ) : (
 
                         categories.map(category => (

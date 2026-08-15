@@ -28,6 +28,8 @@ function ManageProducts() {
     const [imageUrl, setImageUrl] = useState("");
     const [brandId, setBrandId] = useState("");
     const [categoryId, setCategoryId] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
     useEffect(() => {
         loadProducts();
@@ -36,8 +38,22 @@ function ManageProducts() {
     }, []);
 
     const loadProducts = async () => {
-        const response = await getAllProductsForAdmin();
-        setProducts(response.data);
+        try {
+
+            const response =
+                await getAllProductsForAdmin();
+
+            setErrorMessage("");
+
+            setProducts(response.data);
+
+        } catch (error) {
+
+            setErrorMessage(
+                error.response?.data?.message ||
+                "Unable to load products."
+            );
+        }
     };
 
     const loadBrands = async () => {
@@ -72,20 +88,45 @@ function ManageProducts() {
                     product
                 );
 
+                await loadProducts();
+
+                setErrorMessage("");
+
+                setSuccessMessage(
+                    "Product updated successfully."
+                );
+
                 setEditingId(null);
 
             } else {
 
                 await addProduct(product);
+
+                await loadProducts();
+
+                setErrorMessage("");
+
+                setSuccessMessage(
+                    "Product added successfully."
+                );
             }
+
+            setTimeout(() => {
+                setSuccessMessage("");
+            }, 3000);
 
             clearForm();
 
-            loadProducts();
+
 
         } catch (error) {
-            console.error(error);
+
+            setErrorMessage(
+                error.response?.data?.message ||
+                "Unable to save product."
+            );
         }
+
     };
 
     const handleEdit = (product) => {
@@ -113,10 +154,24 @@ function ManageProducts() {
 
             await deleteProduct(id);
 
-            loadProducts();
+            await loadProducts();
+
+            setErrorMessage("");
+
+            setSuccessMessage(
+                "Product deleted successfully."
+            );
+
+            setTimeout(() => {
+                setSuccessMessage("");
+            }, 3000);
 
         } catch (error) {
-            console.error(error);
+
+            setErrorMessage(
+                error.response?.data?.message ||
+                "Unable to delete product."
+            );
         }
     };
 
@@ -131,14 +186,51 @@ function ManageProducts() {
         setCategoryId("");
     };
     const handleActivate = async (id) => {
-        await activateProduct(id);
-        loadProducts();
+
+        try {
+
+            await activateProduct(id);
+
+            await loadProducts();
+
+            setErrorMessage("");
+
+            setSuccessMessage(
+                "Product activated successfully."
+            );
+
+            setTimeout(() => {
+                setSuccessMessage("");
+            }, 3000);
+
+        } catch (error) {
+
+            setErrorMessage(
+                error.response?.data?.message ||
+                "Unable to activate product."
+            );
+        }
     };
 
     return (
         <>
             <AdminNavbar />
 
+            {
+                errorMessage && (
+                    <div className="error-message">
+                        ⚠️ {errorMessage}
+                    </div>
+                )
+            }
+
+            {
+                successMessage && (
+                    <div className="success-message">
+                        ✅ {successMessage}
+                    </div>
+                )
+            }
             <div className="products-form">
 
                 <h2>Manage Products</h2>
@@ -226,7 +318,9 @@ function ManageProducts() {
             <div className="products-grid">
 
                 {products.length === 0 ? (
-                    <p>No products found.</p>
+                    <div className="empty-products">
+                        💄 No products found.
+                    </div>
                 ) : (
                     products.map((product) => (
 

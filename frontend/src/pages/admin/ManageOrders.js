@@ -5,6 +5,8 @@ import { getAllOrders, updateOrderStatusAdmin } from "../../services/orderServic
 function ManageOrders() {
 
     const [orders, setOrders] = useState([]);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
     useEffect(() => {
         loadOrders();
@@ -15,12 +17,21 @@ function ManageOrders() {
 
             const response = await getAllOrders();
 
+            setErrorMessage("");
+
             setOrders(response.data);
 
         } catch (error) {
-            console.error(error);
+
+            setOrders([]);
+
+            setErrorMessage(
+                error.response?.data?.message ||
+                "Unable to load orders."
+            );
         }
     };
+
     const handleStatusUpdate = async (
         orderId,
         status
@@ -33,10 +44,24 @@ function ManageOrders() {
                 status
             );
 
-            loadOrders();
+            await loadOrders();
+
+            setErrorMessage("");
+
+            setSuccessMessage(
+                `Order #${orderId} updated to ${status}`
+            );
+
+            setTimeout(() => {
+                setSuccessMessage("");
+            }, 3000);
 
         } catch (error) {
-            console.error(error);
+
+            setErrorMessage(
+                error.response?.data?.message ||
+                "Unable to update order status."
+            );
         }
     };
 
@@ -45,6 +70,21 @@ function ManageOrders() {
         <>
             <AdminNavbar />
 
+            {
+                errorMessage && (
+                    <div className="error-message">
+                        ⚠️ {errorMessage}
+                    </div>
+                )
+            }
+
+            {
+                successMessage && (
+                    <div className="success-message">
+                        ✅ {successMessage}
+                    </div>
+                )
+            }
             <div className="manage-orders-container">
 
                 <h2 className="manage-orders-title">
@@ -54,9 +94,9 @@ function ManageOrders() {
                 {
                     orders.length === 0 ? (
 
-                        <p className="no-orders">
-                            No Orders Found
-                        </p>
+                        <div className="empty-orders">
+                            📦 No orders found.
+                        </div>
 
                     ) : (
 
@@ -81,18 +121,18 @@ function ManageOrders() {
 
                                     </div>
 
-                                        <p
-                                            className={`status-badge ${order.orderStatus === "PLACED"
-                                                    ? "status-placed"
-                                                    : order.orderStatus === "SHIPPED"
-                                                        ? "status-shipped"
-                                                        : order.orderStatus === "DELIVERED"
-                                                            ? "status-delivered"
-                                                            : "status-cancelled"
-                                                }`}
-                                        >
-                                            {order.orderStatus}
-                                        </p>
+                                    <p
+                                        className={`status-badge ${order.orderStatus === "PLACED"
+                                            ? "status-placed"
+                                            : order.orderStatus === "SHIPPED"
+                                                ? "status-shipped"
+                                                : order.orderStatus === "DELIVERED"
+                                                    ? "status-delivered"
+                                                    : "status-cancelled"
+                                            }`}
+                                    >
+                                        {order.orderStatus}
+                                    </p>
 
                                     <select
                                         className="admin-status-select"
@@ -130,7 +170,7 @@ function ManageOrders() {
                                                 className="admin-order-item"
                                             >
 
-                                                <img src={item.imageUrl} alt={item.imageUrl}/>
+                                                <img src={item.imageUrl} alt={item.imageUrl} />
 
                                                 <div className="admin-item-details">
 

@@ -1,16 +1,17 @@
 -i  need to create a cancel button and functionality so user can cancel the order within a period of time. 
 
-- automate the status updates using scheduler maybe or by admin manually
+-payment mechanism
 
--when i add a product with qantity 2 in cart with quantity 3. it is added and order is being placed. should not be possible as order quantity>stock  quantity. also after adding to cart the stock number should change. also when quantity becomes zero the stock shhould be showing out of stock automatically
+- automate the status updates using scheduler maybe or by admin manually [done]
 
--admin dashboard me mza nhi aa rha, ispe kuch or krna padhega.
+-when i add a product with qantity 2 in cart with quantity 3. it is added and order is being placed. should not be possible as order quantity>stock  quantity. also after adding to cart the stock number should change. also when quantity becomes zero the stock shhould be showing out of stock automatically.[done]
 
--when i do add to cart from user side, there should be a pop up kind of thing to show added to card
+-when i do add to cart from user side, there should be a pop up kind of thing to show added to card [done]
 
 -register those with email id @beautyKart.com as admin [DONE]
 
 -ha abhi hme role based access, role based register bhi krna h. jwt token and security use krni h [DONE]
 
--for now, only product service is secure, brand cart category order is not RBAC
+-validation msgs are showing as alerts
 
+-
