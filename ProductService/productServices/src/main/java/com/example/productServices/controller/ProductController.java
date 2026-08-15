@@ -62,11 +62,6 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
-    //get by name- by query parameter
-    @GetMapping("/search")
-    public ProductResponseDto getByName(@RequestParam String name){
-        return productService.searchByName(name);
-    }
 
     //get all by brandId
     @GetMapping("/brand/{brandId}")
@@ -98,4 +93,12 @@ public class ProductController {
     ) {
         productService.reduceStock(id, quantity);
     }
+
+    //get multiple product with same name
+    @GetMapping("/search")
+public List<ProductResponseDto> getByName(
+        @RequestParam String name
+){
+    return productService.searchByName(name);
+}
 }

@@ -150,32 +150,6 @@ public class ProductService {
         productRepository.save(existing);
     }
 
-    // search by name
-    public ProductResponseDto searchByName(String name) {
-
-        Product existing = productRepository.findByNameIgnoreCase(name)
-                .orElseThrow(() ->
-                        new NotFoundException(
-                                "Product " + name + " not found!"
-                        ));
-
-                CategoryResponseDto category =
-                        categoryClient.getById(
-                                existing.getCategoryId()
-                        );
-
-                BrandResponseDto brand =
-                        brandClient.getById(
-                                existing.getBrandId()
-                        );
-
-                return productMapper.toDto(
-                        existing,
-                        category,
-                        brand
-                );
-        }
-
     // get by brand id
     public List<ProductResponseDto> getByBrandId(Long brandId) {
 
@@ -328,4 +302,39 @@ public class ProductService {
 
                 productRepository.save(product);
         }
+
+        //multiple products with same name
+        public List<ProductResponseDto> searchByName(String name) {
+
+    List<Product> products =
+            productRepository
+                    .findByNameContainingIgnoreCaseAndActiveTrue(name);
+
+    if(products.isEmpty()) {
+        throw new NotFoundException(
+                "No product found with name " + name
+        );
+    }
+
+    return products.stream()
+            .map(product -> {
+
+                CategoryResponseDto category =
+                        categoryClient.getById(
+                                product.getCategoryId()
+                        );
+
+                BrandResponseDto brand =
+                        brandClient.getById(
+                                product.getBrandId()
+                        );
+
+                return productMapper.toDto(
+                        product,
+                        category,
+                        brand
+                );
+            })
+            .toList();
+}
 }

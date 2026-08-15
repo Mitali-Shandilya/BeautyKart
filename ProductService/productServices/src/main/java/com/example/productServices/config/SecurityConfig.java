@@ -30,93 +30,86 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+        private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-    @Bean
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper();
-    }
+        @Bean
+        public ObjectMapper objectMapper() {
+                return new ObjectMapper();
+        }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http
-        .cors(cors -> {})
-        .csrf(csrf -> csrf.disable())
+                http
+                                .cors(cors -> {
+                                })
+                                .csrf(csrf -> csrf.disable())
 
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**")
-                        .permitAll()
+                                .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers("/api/auth/**")
+                                                .permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/api/products/**")
-                        .permitAll()
+                                                .requestMatchers(HttpMethod.PUT, "/api/products/*/reduce-stock")
+                                                .permitAll()
 
-                        .requestMatchers(HttpMethod.PUT,"/api/products/*/reduce-stock")
-                        .permitAll()
+                                                .requestMatchers("/api/auth/**").permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/api/brands/**")
-                        .permitAll()
-                        
-                        .requestMatchers(HttpMethod.GET, "/api/categories/**")
-                        .permitAll()
-                        
-                        .anyRequest()
-                        .authenticated()
-                )
+                                                .requestMatchers("/api/products/**").permitAll()
 
-                .addFilterBefore(
-                        jwtAuthenticationFilter,
-                        UsernamePasswordAuthenticationFilter.class
-                );
+                                                .requestMatchers("/api/brands/**").permitAll()
 
-        return http.build();
-    }
+                                                .requestMatchers("/api/categories/**").permitAll()
 
-    @Bean
-public CorsConfigurationSource corsConfigurationSource() {
+                                                .requestMatchers("/error").permitAll()
 
-    CorsConfiguration configuration =
-            new CorsConfiguration();
+                                                .anyRequest()
+                                                .authenticated())
 
-    configuration.setAllowedOrigins(
-            List.of("http://localhost:3000")
-    );
+                                .addFilterBefore(
+                                                jwtAuthenticationFilter,
+                                                UsernamePasswordAuthenticationFilter.class);
 
-    configuration.setAllowedMethods(
-            List.of("*")
-    );
+                return http.build();
+        }
 
-    configuration.setAllowedHeaders(
-            List.of("*")
-    );
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
 
-    configuration.setAllowCredentials(true);
+                CorsConfiguration configuration = new CorsConfiguration();
 
-    UrlBasedCorsConfigurationSource source =
-            new UrlBasedCorsConfigurationSource();
+                configuration.setAllowedOrigins(
+                                List.of("http://localhost:3000"));
 
-    source.registerCorsConfiguration(
-            "/**",
-            configuration
-    );
+                configuration.setAllowedMethods(
+                                List.of("*"));
 
-    return source;
-}
+                configuration.setAllowedHeaders(
+                                List.of("*"));
 
-    @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config)
-            throws Exception {
+                configuration.setAllowCredentials(true);
 
-        return config.getAuthenticationManager();
-    }
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+
+                source.registerCorsConfiguration(
+                                "/**",
+                                configuration);
+
+                return source;
+        }
+
+        @Bean
+        public AuthenticationManager authenticationManager(
+                        AuthenticationConfiguration config)
+                        throws Exception {
+
+                return config.getAuthenticationManager();
+        }
 }
